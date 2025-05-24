@@ -1,36 +1,45 @@
+// IMPORTS
 const express = require("express");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
+const path = require("path");
+
 const PORT = 5005;
 
-// STATIC DATA
-// Devs Team - Import the provided files with JSON data of students and cohorts here:
-// ...
+// STATIC DATA - Import JSON data
+const students = require("./data/students.json");
+const cohorts = require("./data/cohorts.json");
 
-
-// INITIALIZE EXPRESS APP - https://expressjs.com/en/4x/api.html#express
+// INITIALIZE EXPRESS APP
 const app = express();
 
-
 // MIDDLEWARE
-// Research Team - Set up CORS middleware here:
-// ...
-app.use(express.json());
-app.use(morgan("dev"));
-app.use(express.static("public"));
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cors()); // Enable CORS
+app.use(express.json()); // Parse JSON payloads
+app.use(morgan("dev")); // Log HTTP requests
+app.use(express.static("public")); // Serve static assets
+app.use(express.urlencoded({ extended: false })); // Parse URL-encoded bodies
+app.use(cookieParser()); // Parse cookies
 
+// ROUTES
 
-// ROUTES - https://expressjs.com/en/starter/basic-routing.html
-// Devs Team - Start working on the routes here:
-// ...
+// Route to serve the API documentation HTML file
 app.get("/docs", (req, res) => {
-  res.sendFile(__dirname + "/views/docs.html");
+  res.sendFile(path.join(__dirname, "views", "docs.html"));
 });
 
+// Route to get all students
+app.get("/api/students", (req, res) => {
+  res.json(students);
+});
+
+// Route to get all cohorts
+app.get("/api/cohorts", (req, res) => {
+  res.json(cohorts);
+});
 
 // START SERVER
 app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+  console.log(`✅ Server is running at http://localhost:${PORT}`);
 });
