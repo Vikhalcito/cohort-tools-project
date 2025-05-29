@@ -8,8 +8,9 @@ const path = require("path");
 const PORT = 5005;
 
 // STATIC DATA - Import JSON data
-const students = require("./data/students.json");
-const cohorts = require("./data/cohorts.json");
+const students = require("./students.json");
+const cohorts = require("./cohorts.json");
+
 
 // INITIALIZE EXPRESS APP
 const app = express();
