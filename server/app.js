@@ -6,6 +6,8 @@ const cors = require("cors");
 const path = require("path");
 const mongoose = require("mongoose");
 
+const Student = require("./server/models/student");
+
 const PORT = 5005;
 
 // STATIC DATA - (you'll eventually remove this once DB is fully integrated)
@@ -49,6 +51,16 @@ mongoose
       console.log(`✅ Server is running at http://localhost:${PORT}`);
     });
   })
+
+  .then(() => {
+    return students.find()
+  })
+
+  .then((response) => {
+    console.log(response)
+    console.log("todo gucci")
+  })
+
   .catch((err) => {
     console.error("❌ Failed to connect to MongoDB:", err);
   });
