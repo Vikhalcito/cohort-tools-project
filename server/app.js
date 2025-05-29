@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const path = require("path");
 const mongoose = require("mongoose");
+const Cohort = require("./server/models/cohort.model");
 
 const Student = require("./server/models/student");
 
