@@ -4,43 +4,52 @@ const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const path = require("path");
+const mongoose = require("mongoose");
 
 const PORT = 5005;
 
-// STATIC DATA - Import JSON data
+// STATIC DATA - (you'll eventually remove this once DB is fully integrated)
 const students = require("./students.json");
 const cohorts = require("./cohorts.json");
-
 
 // INITIALIZE EXPRESS APP
 const app = express();
 
 // MIDDLEWARE
-app.use(cors()); // Enable CORS
-app.use(express.json()); // Parse JSON payloads
-app.use(morgan("dev")); // Log HTTP requests
-app.use(express.static("public")); // Serve static assets
-app.use(express.urlencoded({ extended: false })); // Parse URL-encoded bodies
-app.use(cookieParser()); // Parse cookies
+app.use(cors());
+app.use(express.json());
+app.use(morgan("dev"));
+app.use(express.static("public"));
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 // ROUTES
-
-// Route to serve the API documentation HTML file
 app.get("/docs", (req, res) => {
   res.sendFile(path.join(__dirname, "views", "docs.html"));
 });
 
-// Route to get all students
 app.get("/api/students", (req, res) => {
-  res.json(students);
+  res.json(students); // Later: replace with MongoDB find()
 });
 
-// Route to get all cohorts
 app.get("/api/cohorts", (req, res) => {
-  res.json(cohorts);
+  res.json(cohorts); // Later: replace with MongoDB find()
 });
 
-// START SERVER
-app.listen(PORT, () => {
-  console.log(`✅ Server is running at http://localhost:${PORT}`);
-});
+// MONGODB CONNECTION
+const MONGODB_URI = "mongodb://localhost:27017/cohort-tools-api";
+
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => {
+    console.log("✅ Connected to MongoDB");
+
+   
+    app.listen(PORT, () => {
+      console.log(`✅ Server is running at http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("❌ Failed to connect to MongoDB:", err);
+  });
+
