@@ -5,9 +5,9 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const path = require("path");
 const mongoose = require("mongoose");
-const Cohort = require("./server/models/cohort.model");
+const Cohort = require("./models/cohort.model");
 
-const Student = require("./server/models/student");
+const Students = require("./models/student.model");
 
 const PORT = 5005;
 
@@ -35,8 +35,57 @@ app.get("/api/students", (req, res) => {
   res.json(students); // Later: replace with MongoDB find()
 });
 
-app.get("/api/cohorts", (req, res) => {
-  res.json(cohorts); // Later: replace with MongoDB find()
+app.get("/api/cohorts", async (req, res) => {
+  try {
+    const cohorts = await Cohort.find();
+    res.status(200).json(cohorts);
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving cohorts", error });
+  }
+});
+
+// GET one cohort by ID
+app.get("/api/cohorts/:cohortId", async (req, res) => {
+  try {
+    const cohort = await Cohort.findById(req.params.cohortId);
+    res.status(200).json(cohort);
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving cohort", error });
+  }
+});
+
+// POST a new cohort
+app.post("/api/cohorts", async (req, res) => {
+  try {
+    const newCohort = await Cohort.create(req.body);
+    res.status(201).json(newCohort);
+  } catch (error) {
+    res.status(500).json({ message: "Error creating cohort", error });
+  }
+});
+
+// PUT update a cohort by ID
+app.put("/api/cohorts/:cohortId", async (req, res) => {
+  try {
+    const updatedCohort = await Cohort.findByIdAndUpdate(
+      req.params.cohortId,
+      req.body,
+      { new: true }
+    );
+    res.status(200).json(updatedCohort);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating cohort", error });
+  }
+});
+
+// DELETE a cohort by ID
+app.delete("/api/cohorts/:cohortId", async (req, res) => {
+  try {
+    await Cohort.findByIdAndDelete(req.params.cohortId);
+    res.sendStatus(204); // No Content
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting cohort", error });
+  }
 });
 
 // MONGODB CONNECTION
@@ -54,7 +103,7 @@ mongoose
   })
 
   .then(() => {
-    return students.find()
+    return Students.find()
   })
 
   .then((response) => {
