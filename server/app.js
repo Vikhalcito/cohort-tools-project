@@ -13,7 +13,6 @@ const PORT = 5005;
 
 // STATIC DATA - (you'll eventually remove this once DB is fully integrated)
 
-
 // INITIALIZE EXPRESS APP
 const app = express();
 
@@ -30,7 +29,7 @@ app.get("/docs", (req, res) => {
   res.sendFile(path.join(__dirname, "views", "docs.html"));
 });
 
-//calling all students
+//Finding all students
 app.get("/api/students", (req, res) => {
 
   Students.find()
@@ -38,14 +37,14 @@ app.get("/api/students", (req, res) => {
     res.json(response)
   })
   .catch(error => res.status(500).json(error))
-   // Later: replace with MongoDB find()
+   
 });
 
-// calling students with specified cohort
+//Finding students with specified cohort
 app.get("/api/students/cohort/:cohortId", (req, res, next) =>{
   const {cohortId} = req.params
-//encuentra los estudiantes que tengan como cohort al cohortId.
-  Students.find(({ cohort: cohortId })).populate('cohort')  
+  //encuentra los estudiantes que tengan como cohort al cohortId.
+  Students.find(({ cohort: cohortId }))  
   .then(response =>{
     res.json(response)
   })
@@ -53,7 +52,7 @@ app.get("/api/students/cohort/:cohortId", (req, res, next) =>{
 })
 
 
-// calling specified student
+//Finding a student by his id.
 app.get("/api/students/:studentId", (req, res, next) =>{
   const {studentId} = req.params
   Students.findById(studentId)
@@ -65,15 +64,69 @@ app.get("/api/students/:studentId", (req, res, next) =>{
 
 //creating new student
 app.post("/api/students", (req, res, next) =>{
-    Students.create()
+
+    const studentData = req.body; //data from studet passed through the form in the frontend
+    const cohortId = studentData.cohort;// accessing to the given id of the cohort
+
+    Cohort.findById(cohortId)
+    .then((foundCohort) => {
+      if (!foundCohort) {
+        return res.status(404).json({ message: "Cohort not found" });
+      }
+
+      // Crear al estudiante
+      return Students.create(studentData);
+    })
+    .then((createdStudent) => {
+      if (createdStudent) {
+        res.status(201).json(createdStudent);
+      }
+    })
+    .catch((err) => {
+      console.error("Error creating student:", err);
+      res.status(500).json({
+        message: "Internal server error",
+        error: err.message,
+      });
+    });
+    
+
 })
+
 //updating specified student
 app.put("/api/students/:studentId", (req, res, next) =>{
   const {studentId} = req.params
   const updatedStudent = req.body
   Students.findByIdAndUpdate(studentId, updatedStudent, {new: true})
+  .then((updatedStudent)=> {
+    if(!updatedStudent){
+      return res.status(404).json({message: "student not found"})
+    }
+    res.json(updatedStudent)
+  })
+  .catch((err) => {
+      console.error("Error updating student:", err);
+      res.status(500).json({ message: "Internal server error", error: err.message });
+    });
 })
 
+//Delete student by Id.
+
+app.delete("/api/students/:studentId", (req, res) => {
+  const { studentId } = req.params;
+
+  Students.findByIdAndDelete(studentId)
+    .then((deletedStudent) => {
+      if (!deletedStudent) {
+        return res.status(404).json({ message: "Student not found" });
+      }
+      res.json({ message: "Student deleted successfully" });
+    })
+    .catch((err) => {
+      console.error("Error deleting student:", err);
+      res.status(500).json({ message: "Internal server error", error: err.message });
+    });
+});
 
 
 app.get("/api/cohorts", async (req, res) => {
