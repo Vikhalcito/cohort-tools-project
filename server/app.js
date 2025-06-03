@@ -6,6 +6,7 @@ const cors = require("cors");
 const path = require("path");
 const mongoose = require("mongoose");
 const Cohort = require("./models/cohort.model");
+const studentRoutes = require("./routes/student.routes");
 
 const Students = require("./models/student.model");
 
