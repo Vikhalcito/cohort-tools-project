@@ -13,8 +13,7 @@ const Students = require("./models/student.model");
 const PORT = 5005;
 
 // STATIC DATA - (you'll eventually remove this once DB is fully integrated)
-const students = require("./students.json");
-const cohorts = require("./cohorts.json");
+
 
 // INITIALIZE EXPRESS APP
 const app = express();
@@ -32,9 +31,51 @@ app.get("/docs", (req, res) => {
   res.sendFile(path.join(__dirname, "views", "docs.html"));
 });
 
+//calling all students
 app.get("/api/students", (req, res) => {
-  res.json(students); // Later: replace with MongoDB find()
+
+  Students.find()
+  .then(response => {
+    res.json(response)
+  })
+  .catch(error => res.status(500).json(error))
+   // Later: replace with MongoDB find()
 });
+
+// calling students with specified cohort
+app.get("/api/students/cohort/:cohortId", (req, res, next) =>{
+  const {cohortId} = req.params
+//encuentra los estudiantes que tengan como cohort al cohortId.
+  Students.find(({ cohort: cohortId })).populate('cohort')  
+  .then(response =>{
+    res.json(response)
+  })
+  .catch(error => res.status(500).json(error))
+})
+
+
+// calling specified student
+app.get("/api/students/:studentId", (req, res, next) =>{
+  const {studentId} = req.params
+  Students.findById(studentId)
+  .then(response =>{
+    res.json(response)
+  })
+  .catch(error => res.status(500).json(error))
+})
+
+//creating new student
+app.post("/api/students", (req, res, next) =>{
+    Students.create()
+})
+//updating specified student
+app.put("/api/students/:studentId", (req, res, next) =>{
+  const {studentId} = req.params
+  const updatedStudent = req.body
+  Students.findByIdAndUpdate(studentId, updatedStudent, {new: true})
+})
+
+
 
 app.get("/api/cohorts", async (req, res) => {
   try {
@@ -104,6 +145,7 @@ mongoose
   })
 
   .then(() => {
+    return Students.find()
     return Students.find()
   })
 
