@@ -7,8 +7,9 @@ const path = require("path");
 const mongoose = require("mongoose");
 const Cohort = require("./models/cohort.model");
 const studentRoutes = require("./routes/student.routes");
-
 const Students = require("./models/student.model");
+const errorHandler = require("./middleware/errorHandler");
+
 
 const PORT = 5005;
 
@@ -31,14 +32,10 @@ app.get("/docs", (req, res) => {
 });
 
 //Finding all students
-app.get("/api/students", (req, res) => {
-
+app.get("/api/students", (req, res, next) => {
   Students.find()
-  .then(response => {
-    res.json(response)
-  })
-  .catch(error => res.status(500).json(error))
-   
+    .then(response => res.json(response))
+    .catch(next); 
 });
 
 //Finding students with specified cohort
@@ -183,6 +180,8 @@ app.delete("/api/cohorts/:cohortId", async (req, res) => {
   }
 });
 
+//error handler thingy 
+app.use(errorHandler);
 // MONGODB CONNECTION
 const MONGODB_URI = "mongodb://localhost:27017/cohort-tools-api";
 
