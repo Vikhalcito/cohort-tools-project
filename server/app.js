@@ -43,10 +43,8 @@ app.get("/api/students/cohort/:cohortId", (req, res, next) =>{
   const {cohortId} = req.params
   //encuentra los estudiantes que tengan como cohort al cohortId.
   Students.find(({ cohort: cohortId }))  
-  .then(response =>{
-    res.json(response)
-  })
-  .catch(error => res.status(500).json(error))
+  .then(response =>res.json(response))
+  .catch(next)
 })
 
 
@@ -54,10 +52,8 @@ app.get("/api/students/cohort/:cohortId", (req, res, next) =>{
 app.get("/api/students/:studentId", (req, res, next) =>{
   const {studentId} = req.params
   Students.findById(studentId)
-  .then(response =>{
-    res.json(response)
-  })
-  .catch(error => res.status(500).json(error))
+  .then(response => res.json(response))
+  .catch(next)
 })
 
 //creating new student
@@ -69,7 +65,9 @@ app.post("/api/students", (req, res, next) =>{
     Cohort.findById(cohortId)
     .then((foundCohort) => {
       if (!foundCohort) {
-        return res.status(404).json({ message: "Cohort not found" });
+        const error = new Error("Cohort not found");
+        error.statusCode = 404;
+        throw error;
       }
 
       // Crear al estudiante
@@ -80,13 +78,7 @@ app.post("/api/students", (req, res, next) =>{
         res.status(201).json(createdStudent);
       }
     })
-    .catch((err) => {
-      console.error("Error creating student:", err);
-      res.status(500).json({
-        message: "Internal server error",
-        error: err.message,
-      });
-    });
+    .catch(next);
     
 
 })
@@ -98,41 +90,41 @@ app.put("/api/students/:studentId", (req, res, next) =>{
   Students.findByIdAndUpdate(studentId, updatedStudent, {new: true})
   .then((updatedStudent)=> {
     if(!updatedStudent){
-      return res.status(404).json({message: "student not found"})
+      const error = new Error("Student not found");
+      error.statusCode = 404;
+      throw error;
     }
     res.json(updatedStudent)
   })
-  .catch((err) => {
-      console.error("Error updating student:", err);
-      res.status(500).json({ message: "Internal server error", error: err.message });
-    });
+  .catch(next);
 })
 
 //Delete student by Id.
 
-app.delete("/api/students/:studentId", (req, res) => {
+app.delete("/api/students/:studentId", (req, res, next) => {
   const { studentId } = req.params;
 
   Students.findByIdAndDelete(studentId)
     .then((deletedStudent) => {
       if (!deletedStudent) {
-        return res.status(404).json({ message: "Student not found" });
+        const error = new Error("Student not found");
+        error.statusCode = 404;
+        throw error
       }
       res.json({ message: "Student deleted successfully" });
     })
-    .catch((err) => {
-      console.error("Error deleting student:", err);
-      res.status(500).json({ message: "Internal server error", error: err.message });
-    });
+    .catch(next)
 });
 
 
-app.get("/api/cohorts", async (req, res) => {
+app.get("/api/cohorts", async (req, res, next) => {
   try {
     const cohorts = await Cohort.find();
     res.status(200).json(cohorts);
-  } catch (error) {
-    res.status(500).json({ message: "Error retrieving cohorts", error });
+  } catch (err) {
+    const error = new Error("Error retrieving cohorts");
+    error.statusCode = 500;
+    next(error);
   }
 });
 
@@ -141,8 +133,10 @@ app.get("/api/cohorts/:cohortId", async (req, res) => {
   try {
     const cohort = await Cohort.findById(req.params.cohortId);
     res.status(200).json(cohort);
-  } catch (error) {
-    res.status(500).json({ message: "Error retrieving cohort", error });
+  } catch (err) {
+    const error = new Error("Error retrieving cohort");
+    error.statusCode = 500;
+    next(error);
   }
 });
 
@@ -151,8 +145,10 @@ app.post("/api/cohorts", async (req, res) => {
   try {
     const newCohort = await Cohort.create(req.body);
     res.status(201).json(newCohort);
-  } catch (error) {
-    res.status(500).json({ message: "Error creating cohort", error });
+  } catch (err) {
+    const error = new Error("Error creating cohort");
+    error.statusCode = 500;
+    next(error);
   }
 });
 
@@ -165,8 +161,10 @@ app.put("/api/cohorts/:cohortId", async (req, res) => {
       { new: true }
     );
     res.status(200).json(updatedCohort);
-  } catch (error) {
-    res.status(500).json({ message: "Error updating cohort", error });
+  } catch (err) {
+    const error = new Error("Error updating cohort");
+    error.statusCode = 500;
+    next(error);
   }
 });
 
@@ -175,13 +173,17 @@ app.delete("/api/cohorts/:cohortId", async (req, res) => {
   try {
     await Cohort.findByIdAndDelete(req.params.cohortId);
     res.sendStatus(204); // No Content
-  } catch (error) {
-    res.status(500).json({ message: "Error deleting cohort", error });
+  } catch (err) {
+    const error = new Error("Error deleting cohort");
+    error.statusCode = 500;
+    next(error);
   }
 });
 
 //error handler thingy 
 app.use(errorHandler);
+
+
 // MONGODB CONNECTION
 const MONGODB_URI = "mongodb://localhost:27017/cohort-tools-api";
 
