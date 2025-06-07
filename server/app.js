@@ -11,6 +11,7 @@ const Students = require("./models/student.model");
 const errorHandler = require("./middleware/errorHandler");
 const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");
+const User = require("./models/user.model");
 
 
 

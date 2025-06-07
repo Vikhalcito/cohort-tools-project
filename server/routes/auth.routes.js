@@ -18,7 +18,8 @@ router.post("/signup", async (req, res, next) => {
     const newUser = await User.create({ email, password: hashedPassword, name });
 
     res.status(201).json({ id: newUser._id, email: newUser.email, name: newUser.name });
-  } catch (err) {
+  console.log("ajuhsdas");} 
+  catch (err) {
     next(err);
   }
 });
@@ -41,7 +42,7 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
-// Token verify route - protected route example
+// Middleware to check if user is authenticated
 router.get("/verify", authenticate, (req, res) => {
   res.json({ message: "Token valid", user: req.auth });
 });

@@ -1,22 +1,24 @@
 const jwt = require("jsonwebtoken");
-const expressJwt = require("express-jwt");
-
-const secret = process.env.JWT_SECRET || "supersecret_jwt_key"; // use env variable in prod
-
-// Middleware to protect routes and decode token
+const { expressjwt: expressJwt } = require("express-jwt"); // :white_check_mark: CORREGIDO
+const secret = process.env.JWT_SECRET || "supersecret_jwt_key"; // usa variable de entorno en producción
+// Middleware para proteger rutas y decodificar el token
 const authenticate = expressJwt({
   secret,
   algorithms: ["HS256"],
-  requestProperty: "auth",  // decoded token will be in req.auth
+  requestProperty: "auth", // El usuario estará disponible en req.auth
 });
-
-// Function to sign a JWT token for a user
+// Función para firmar (crear) un token JWT para un usuario
 function signToken(user) {
   return jwt.sign(
-    { id: user._id, email: user.email }, 
-    secret, 
-    { expiresIn: "1d" }
+    { id: user._id, email: user.email }, // payload del token
+    secret,                              // clave secreta para firmarlo
+    { expiresIn: "1d" }                  // duración del token: 1 día
   );
 }
-
 module.exports = { authenticate, signToken };
+
+
+
+
+
+
