@@ -9,6 +9,9 @@ const Cohort = require("./models/cohort.model");
 const studentRoutes = require("./routes/student.routes");
 const Students = require("./models/student.model");
 const errorHandler = require("./middleware/errorHandler");
+const authRoutes = require("./routes/auth.routes");
+const userRoutes = require("./routes/user.routes");
+
 
 
 const PORT = 5005;
@@ -179,6 +182,10 @@ app.delete("/api/cohorts/:cohortId", async (req, res) => {
     next(error);
   }
 });
+// AUTHENTICATION ROUTES
+app.use("/auth", authRoutes);
+app.use("/api/users", userRoutes);
+
 
 //error handler thingy 
 app.use(errorHandler);
